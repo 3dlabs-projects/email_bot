@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Sender</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" enctype="multipart/form-data">
+            <select name="category" id="category" required onchange="toggleCustomEmail()">
+                <option value="">Select Category</option>
+                {% for category in categories %}
+                <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
+
+            <div id="custom-email-field" class="custom-email">
+                <input type="email" name="custom_email" placeholder="Enter email addresses (comma-separated)" multiple>
+                <small>For multiple emails, separate them with commas (e.g., email1@example.com, email2@example.com)</small>
+            </div>
+
+            <input type="text" name="subject" placeholder="Subject" required>
+            
+            <textarea name="message" placeholder="Message" required></textarea>
+            
+            <input type="file" name="attachment">
+            
+            <button type="submit">Send Email(15 emails or less)</button>
+        </form>
+    </div>
+
+    <script>
+        function toggleCustomEmail() {
+            var category = document.getElementById('category').value;
+            var customEmailField = document.getElementById('custom-email-field');
+            if (category === 'Custom') {
+                customEmailField.style.display = 'block';
+                customEmailField.classList.add('visible');
+            } else {
+                customEmailField.style.display = 'none';
+                customEmailField.classList.remove('visible');
+            }
+        }
+    </script>
+
+    <!-- Add this before closing body tag -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='sticky-form.css') }}">
+
+    <!-- <div class="sticky-contact-form">
+        <div class="sticky-contact-toggle">Contact Us</div>
+        <form id="sticky-contact-form">
+            <div class="sticky-form-field">
+                <input type="text" name="name" placeholder="Your Name" required>
+            </div>
+            <div class="sticky-form-field">
+                <input type="email" name="email" placeholder="Your Email" required>
+            </div>
+            <div class="sticky-form-field">
+                <textarea name="message" placeholder="Your Message" required></textarea>
+            </div>
+            <button type="submit" class="sticky-form-submit">Send Message</button>
+        </form>
+    </div> -->
+
+    <script>
+    // Add this before closing body tag
+    document.addEventListener('DOMContentLoaded', function() {
+        const stickyForm = document.querySelector('.sticky-contact-form');
+        const toggle = document.querySelector('.sticky-contact-toggle');
+        const form = document.getElementById('sticky-contact-form');
+    
+        toggle.addEventListener('click', () => {
+            stickyForm.classList.toggle('open');
+        });
+    
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+    
+            try {
+                const response = await fetch('/submit-contact', {
+                    method: 'POST',
+                    body: formData
+                });
+    
+                const result = await response.json();
+                alert(result.message);
+    
+                if (result.status === 'success') {
+                    form.reset();
+                    stickyForm.classList.remove('open');
+                }
+            } catch (error) {
+                alert('Failed to send message. Please try again.');
+            }
+        });
+    });
+    </script>
+</body>
+</html>
+
+
